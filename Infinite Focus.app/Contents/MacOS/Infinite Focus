@@ -1,0 +1,8 @@
+#!/bin/bash
+PROJECT_DIR="/Users/utilisateur/dev_ai/Infinite Focus"
+cd "$PROJECT_DIR" || exit 1
+
+export PATH="/Users/utilisateur/.local/bin:/opt/homebrew/bin:$PATH"
+export PYTHONUNBUFFERED=1
+
+exec "$PROJECT_DIR/.venv/bin/python" "$PROJECT_DIR/main.py" "$@"

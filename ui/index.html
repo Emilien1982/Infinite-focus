@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Infinite Focus</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="window-container">
+    <!-- Header / Top Bar -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">∞</div>
+        <div class="brand-text">
+          <h1>Infinite Focus</h1>
+          <span class="subtext">Musique générative locale pour la concentration</span>
+        </div>
+      </div>
+      
+      <div class="header-badges">
+        <div id="statusBadge" class="status-badge initializing">
+          <span class="status-dot"></span>
+          <span id="statusText">Initialisation...</span>
+        </div>
+        <div class="hardware-badge">
+          <span class="chip-icon">⚡</span>
+          <span id="deviceText">Apple Silicon</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Visualizer & Primary Play Section -->
+    <section class="player-hero">
+      <div class="visualizer-wrapper">
+        <canvas id="visualizerCanvas"></canvas>
+        <div class="visualizer-overlay">
+          <button id="playPauseBtn" class="play-btn" title="Lancer / Mettre en pause">
+            <svg id="playIcon" class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <svg id="pauseIcon" class="btn-icon hidden" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Detail status & volume row -->
+      <div class="player-controls-row">
+        <div class="playback-meta">
+          <span id="detailStatus" class="detail-status">Prêt</span>
+          <span id="bufferInfo" class="buffer-info">Mémoire: 0s</span>
+        </div>
+        
+        <div class="volume-control">
+          <button id="muteBtn" class="mute-btn" title="Couper le son">
+            <svg id="volumeIcon" class="vol-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+            </svg>
+          </button>
+          <input type="range" id="volumeSlider" min="0" max="100" value="85" class="volume-slider">
+          <span id="volumePercent" class="vol-percent">85%</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Prompt Input Section -->
+    <section class="prompt-section">
+      <div class="section-header">
+        <label for="promptInput" class="section-title">Prompt Sonore Actif</label>
+        <div class="prompt-actions">
+          <button id="randomPromptBtn" class="btn-text" title="Inspiration aléatoire">
+            <span>🎲</span> Idée
+          </button>
+          <button id="saveCurrentPromptBtn" class="btn-text" title="Sauvegarder ce prompt">
+            <span>⭐</span> Sauvegarder
+          </button>
+        </div>
+      </div>
+
+      <div class="input-card">
+        <textarea id="promptInput" rows="2" placeholder="Décrivez l'ambiance sonore idéale pour vous concentrer (ex: deep ambient synth pads, 432Hz warm drone, calm lofi piano...)"></textarea>
+        <button id="applyPromptBtn" class="btn-apply" title="Lancer immédiatement la composition de ce thème">
+          Changer de thème (immédiat)
+        </button>
+      </div>
+    </section>
+
+    <!-- Presets Section -->
+    <section class="presets-section">
+      <div class="tabs-header">
+        <button class="tab-btn active" data-tab="curated">⚡ Préréglages Concentration</button>
+        <button class="tab-btn" data-tab="custom">⭐ Mes Prompts (<span id="customCount">0</span>)</button>
+      </div>
+
+      <!-- Curated Presets Tab -->
+      <div id="curatedTab" class="tab-content active">
+        <div id="curatedList" class="presets-grid"></div>
+      </div>
+
+      <!-- Custom Saved Presets Tab -->
+      <div id="customTab" class="tab-content">
+        <div id="customList" class="presets-grid">
+          <div class="empty-state">
+            <p>Aucun prompt sauvegardé pour le moment.</p>
+            <p class="empty-hint">Écrivez un prompt ci-dessus et cliquez sur "⭐ Sauvegarder" pour le retrouver ici.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer info -->
+    <footer class="app-footer">
+      <span class="footer-note">Génération continue locale en RAM • Aucun fichier créé sur disque</span>
+      <span class="footer-model">MusicGen Small • Open Source Meta</span>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
