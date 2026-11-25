@@ -24,15 +24,19 @@ const RANDOM_INSPIRATIONS = [
 
 // DOM Elements
 const playPauseBtn = document.getElementById('playPauseBtn');
+const playBtnSpinner = document.getElementById('playBtnSpinner');
 const playIcon = document.getElementById('playIcon');
 const pauseIcon = document.getElementById('pauseIcon');
 const statusBadge = document.getElementById('statusBadge');
 const statusText = document.getElementById('statusText');
+const miniStatusDot = document.getElementById('miniStatusDot');
 const deviceText = document.getElementById('deviceText');
 const detailStatus = document.getElementById('detailStatus');
 const bufferInfo = document.getElementById('bufferInfo');
 const promptInput = document.getElementById('promptInput');
 const applyPromptBtn = document.getElementById('applyPromptBtn');
+const enrichPromptBtn = document.getElementById('enrichPromptBtn');
+const enrichBtnLabel = document.getElementById('enrichBtnLabel');
 const randomPromptBtn = document.getElementById('randomPromptBtn');
 const saveCurrentPromptBtn = document.getElementById('saveCurrentPromptBtn');
 const curatedList = document.getElementById('curatedList');
@@ -41,6 +45,8 @@ const customCount = document.getElementById('customCount');
 const volumeSlider = document.getElementById('volumeSlider');
 const volumePercent = document.getElementById('volumePercent');
 const muteBtn = document.getElementById('muteBtn');
+const toggleMiniBtn = document.getElementById('toggleMiniBtn');
+const restoreFullBtn = document.getElementById('restoreFullBtn');
 const canvas = document.getElementById('visualizerCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -140,11 +146,20 @@ function updateUI(s) {
     pauseIcon.classList.add('hidden');
   }
 
+  // Visual Spinner Animation around Play Button when generating music
+  if (s.is_generating) {
+    if (playBtnSpinner) playBtnSpinner.classList.remove('hidden');
+    playPauseBtn.classList.add('generating-pulse');
+  } else {
+    if (playBtnSpinner) playBtnSpinner.classList.add('hidden');
+    playPauseBtn.classList.remove('generating-pulse');
+  }
+
   // Update Status Badge
   statusBadge.className = 'status-badge';
   if (s.is_generating) {
     statusBadge.classList.add('generating');
-    statusText.textContent = "Génération IA en RAM...";
+    statusText.textContent = s.is_seed_phase ? "Amorce rapide (~7s)..." : "Composition IA en RAM...";
   } else if (s.is_playing) {
     statusBadge.classList.add('playing');
     statusText.textContent = "Lecture continue";
@@ -157,6 +172,23 @@ function updateUI(s) {
   } else {
     statusBadge.classList.add('initializing');
     statusText.textContent = s.status_detail || "Initialisation...";
+  }
+
+  // Mini Status Dot
+  if (miniStatusDot) {
+    miniStatusDot.className = 'status-dot-mini';
+    if (s.is_generating) {
+      miniStatusDot.classList.add('generating');
+    } else if (s.is_playing) {
+      miniStatusDot.classList.add('playing');
+    } else if (s.status === 'paused') {
+      miniStatusDot.classList.add('paused');
+    }
+  }
+
+  // Mini-mode body class sync
+  if (s.is_mini !== undefined) {
+    document.body.classList.toggle('mini-mode', s.is_mini);
   }
 
   detailStatus.textContent = s.status_detail || "Prêt";
@@ -313,6 +345,33 @@ randomPromptBtn.addEventListener('click', () => {
   promptInput.focus();
 });
 
+if (enrichPromptBtn) {
+  enrichPromptBtn.addEventListener('click', async () => {
+    const p = promptInput.value.trim();
+    enrichPromptBtn.disabled = true;
+    enrichPromptBtn.classList.add('loading');
+    const originalLabel = enrichBtnLabel ? enrichBtnLabel.textContent : "Enrichir";
+    if (enrichBtnLabel) enrichBtnLabel.textContent = "Texture en cours...";
+
+    try {
+      const res = await window.pywebview.api.enrich_prompt(p);
+      if (res && res.success && res.enriched) {
+        promptInput.value = res.enriched;
+        promptInput.scrollTop = promptInput.scrollHeight;
+        promptInput.focus();
+      } else {
+        console.error("Erreur enrichissement:", res ? res.error : "Inconnu");
+      }
+    } catch (err) {
+      console.error("Exception enrichissement:", err);
+    } finally {
+      enrichPromptBtn.disabled = false;
+      enrichPromptBtn.classList.remove('loading');
+      if (enrichBtnLabel) enrichBtnLabel.textContent = originalLabel;
+    }
+  });
+}
+
 saveCurrentPromptBtn.addEventListener('click', async () => {
   const p = promptInput.value.trim();
   if (!p) {
@@ -358,6 +417,10 @@ volumeSlider.addEventListener('input', (e) => {
   isMuted = val === 0;
 });
 
+volumeSlider.addEventListener('change', () => {
+  volumeSlider.blur();
+});
+
 muteBtn.addEventListener('click', () => {
   if (isMuted) {
     isMuted = false;
@@ -389,3 +452,44 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     if (target) target.classList.add('active');
   });
 });
+
+// Mini Player Toggle
+async function toggleMiniMode() {
+  if (!window.pywebview || !window.pywebview.api) return;
+  try {
+    const res = await window.pywebview.api.toggle_mini_mode();
+    if (res && res.is_mini !== undefined) {
+      document.body.classList.toggle('mini-mode', res.is_mini);
+      setTimeout(resizeCanvas, 100);
+    }
+  } catch (err) {
+    console.error("Erreur toggle mini mode:", err);
+  }
+}
+
+if (toggleMiniBtn) toggleMiniBtn.addEventListener('click', toggleMiniMode);
+if (restoreFullBtn) restoreFullBtn.addEventListener('click', toggleMiniMode);
+
+// Keyboard Shortcuts (Space: Play/Pause, Right/Left Arrow: Next Track)
+window.addEventListener('keydown', (e) => {
+  const isTyping = e.target.tagName === 'TEXTAREA' || (e.target.tagName === 'INPUT' && e.target.type !== 'range');
+  if (isTyping) {
+    return;
+  }
+
+  if (e.code === 'Space') {
+    e.preventDefault();
+    e.stopPropagation();
+    playPauseBtn.click();
+  } else if (e.code === 'ArrowRight' || e.code === 'MediaTrackNext') {
+    e.preventDefault();
+    if (window.pywebview && window.pywebview.api) {
+      window.pywebview.api.skip_next();
+    }
+  } else if (e.code === 'ArrowLeft' || e.code === 'MediaTrackPrevious') {
+    e.preventDefault();
+    if (window.pywebview && window.pywebview.api) {
+      window.pywebview.api.skip_next();
+    }
+  }
+}, true);

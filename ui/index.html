@@ -27,6 +27,11 @@
           <span class="chip-icon">⚡</span>
           <span id="deviceText">Apple Silicon</span>
         </div>
+        <button id="toggleMiniBtn" class="btn-icon-header" title="Basculer en Mini Lecteur">
+          <svg class="mini-mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+          </svg>
+        </button>
       </div>
     </header>
 
@@ -35,20 +40,24 @@
       <div class="visualizer-wrapper">
         <canvas id="visualizerCanvas"></canvas>
         <div class="visualizer-overlay">
-          <button id="playPauseBtn" class="play-btn" title="Lancer / Mettre en pause">
-            <svg id="playIcon" class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-            <svg id="pauseIcon" class="btn-icon hidden" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-            </svg>
-          </button>
+          <div class="play-btn-wrapper">
+            <div id="playBtnSpinner" class="play-btn-spinner hidden"></div>
+            <button id="playPauseBtn" class="play-btn" title="Lancer / Mettre en pause (Espace)">
+              <svg id="playIcon" class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              <svg id="pauseIcon" class="btn-icon hidden" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Detail status & volume row -->
       <div class="player-controls-row">
         <div class="playback-meta">
+          <span id="miniStatusDot" class="status-dot-mini"></span>
           <span id="detailStatus" class="detail-status">Prêt</span>
           <span id="bufferInfo" class="buffer-info">Mémoire: 0s</span>
         </div>
@@ -61,6 +70,11 @@
           </button>
           <input type="range" id="volumeSlider" min="0" max="100" value="85" class="volume-slider">
           <span id="volumePercent" class="vol-percent">85%</span>
+          <button id="restoreFullBtn" class="btn-icon-mini-toggle" title="Revenir à l'affichage standard">
+            <svg class="mini-toggle-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+            </svg>
+          </button>
         </div>
       </div>
     </section>
@@ -70,6 +84,9 @@
       <div class="section-header">
         <label for="promptInput" class="section-title">Prompt Sonore Actif</label>
         <div class="prompt-actions">
+          <button id="enrichPromptBtn" class="btn-text btn-enrich" title="Enrichir et texturer le prompt sonore (IA locale)">
+            <span class="enrich-icon">✨</span> <span id="enrichBtnLabel">Enrichir</span>
+          </button>
           <button id="randomPromptBtn" class="btn-text" title="Inspiration aléatoire">
             <span>🎲</span> Idée
           </button>
@@ -80,7 +97,7 @@
       </div>
 
       <div class="input-card">
-        <textarea id="promptInput" rows="2" placeholder="Décrivez l'ambiance sonore idéale pour vous concentrer (ex: deep ambient synth pads, 432Hz warm drone, calm lofi piano...)"></textarea>
+        <textarea id="promptInput" rows="4" placeholder="Décrivez l'ambiance sonore idéale pour vous concentrer (ex: deep ambient synth pads, 432Hz warm drone, calm lofi piano...)"></textarea>
         <button id="applyPromptBtn" class="btn-apply" title="Lancer immédiatement la composition de ce thème">
           Changer de thème (immédiat)
         </button>
